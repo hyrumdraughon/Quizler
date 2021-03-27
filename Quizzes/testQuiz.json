@@ -1,0 +1,38 @@
+[
+    {
+        "type": "list",
+        "name": "question-1",
+        "message": "2 + 2?",
+        "choices": [
+            "3",
+            "4"
+        ]
+    },
+    {
+        "type": "list",
+        "name": "question-2",
+        "message": "3 squared?",
+        "choices": [
+            "6",
+            "9"
+        ]
+    },
+    {
+        "type": "list",
+        "name": "question-3",
+        "message": "4 + 3?",
+        "choices": [
+            "7",
+            "2"
+        ]
+    },
+    {
+        "type": "list",
+        "name": "question-4",
+        "message": "6 - 5?",
+        "choices": [
+            "1",
+            "3"
+        ]
+    }
+]

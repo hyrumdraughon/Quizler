@@ -11,7 +11,7 @@ export const chooseRandom = (arr=[], numItems) => {
   let result = []
   let unchosen = [...arr]
   for (let i=0; i<numItems; i++) {
-    let randomIndex = Math.floor(Math.random() * arr.length)
+    let randomIndex = Math.floor(Math.random() * unchosen.length)
     result.push(unchosen[randomIndex])
     unchosen.splice(randomIndex, 1)
   }
@@ -51,8 +51,10 @@ export const createQuestions = (obj = {}) => {
   let choiceKeys = keys.filter(currentValue => currentValue.includes('choice'))
 
   for (let i=0; i<questionKeys.length; i++) {
-    let qChoiceKeys = choiceKeys.filter(currentValue => currentValue.includes(questionKeys[i]))
+    let qcks = choiceKeys.filter(curr => curr.charAt(questionKeys[i].length).includes('-'))
+    let qChoiceKeys = qcks.filter(currentValue => currentValue.includes(questionKeys[i]))
     let qChoices = []
+    
     for (let j=0; j<qChoiceKeys.length; j++) {
       qChoices[j] = obj[qChoiceKeys[j]]
     }
@@ -66,6 +68,22 @@ export const createQuestions = (obj = {}) => {
     questions.push(question)
   }
   return questions
+}
+
+// this function renames questions, because inquirer.prompt will not
+// return both answers to two questions with the same name
+export const makeNewQuestions = oldQs => {
+  let newQs = []
+  for (let i=0; i<oldQs.length; i++) {
+    let newQ = {
+      type: 'list',
+      name: 'question-'+(i+1),
+      message: oldQs[i].message,
+      choices: [...(oldQs[i].choices)]
+    }
+    newQs.push(newQ)
+  }
+  return newQs
 }
 
 export const readFile = path =>

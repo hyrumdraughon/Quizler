@@ -6,7 +6,8 @@ import {
   writeFile,
   chooseRandom,
   createPrompt,
-  createQuestions
+  createQuestions,
+  makeNewQuestions
 } from './lib'
 
 const cli = vorpal()
@@ -32,17 +33,30 @@ const askForQuestions = [
   }
 ]
 
-const createQuiz = title =>
+const createQuiz = title => 
   prompt(askForQuestions)
-    .then(answer =>
-      // TODO
-      console.log(answer)
-    )
+    .then(answer => createPrompt(answer))
+    .then(promptArray => prompt(promptArray))
+    .then(response => createQuestions(response))
+    .then(quiz => writeFile('Quizzes/' + title + '.json', JSON.stringify(quiz)))
     .catch(err => console.log('Error creating the quiz.', err))
 
-// const takeQuiz = (title, output) => TODO
+const takeQuiz = (title, output) => 
+  readFile('Quizzes/' + title + '.json')
+    .then(quiz => prompt(JSON.parse(quiz)))
+    .then(answers => writeFile('QuizResponses/' + output + '.json', JSON.stringify(answers)))
+    .catch(err => console.log('Error taking the quiz.', err))
 
-// const takeRandomQuiz = (quizzes, output, n) => TODO
+const takeRandomQuiz = (quizzes, output, n) => 
+  Promise.all(quizzes.map(curr => readFile('Quizzes/' + curr + '.json')))
+    .then(buffers => buffers.map(buf => JSON.parse(buf)))
+    .then(quizzesArray => quizzesArray.flat())
+    .then(questionsArray => chooseRandom(questionsArray, n))
+    .then(oldRandQs => makeNewQuestions(oldRandQs))
+    .then(renamedQs => JSON.parse(JSON.stringify(renamedQs)))
+    .then(randomQuestions => prompt(randomQuestions))
+    .then(answers => writeFile('QuizResponses/' + output + '.json', JSON.stringify(answers)))
+    .catch(err => console.log('Error taking a random quiz.', err))
 
 cli
   .command(
@@ -60,6 +74,7 @@ cli
   )
   .action(function (input, callback) {
     // TODO implement functionality for taking a quiz
+    return takeQuiz(input.fileName, input.outputFile)
   })
 
 cli
@@ -71,6 +86,7 @@ cli
   )
   .action(function (input, callback) {
     // TODO implement the functionality for taking a random quiz
+    return takeRandomQuiz(input.fileNames, input.outputFile, Math.floor(Math.random() * 11))
   })
 
 cli.delimiter(cli.chalk['yellow']('quizler>')).show()
